@@ -1,0 +1,158 @@
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Smooth scrolling for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      
+      const targetId = this.getAttribute('href');
+      const targetElement = document.querySelector(targetId);
+      
+      if (targetElement) {
+        targetElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+        
+        // Update URL without page reload
+        history.pushState(null, null, targetId);
+      }
+    });
+  });
+  
+  // Update year in footer copyright text
+  const yearElement = document.querySelector('footer p');
+  if (yearElement) {
+    const currentYear = new Date().getFullYear();
+    yearElement.textContent = yearElement.textContent.replace('2023', currentYear);
+  }
+  
+  // Mobile menu toggle
+  const menuButton = document.querySelector('header button');
+  const mobileNav = document.createElement('div');
+  mobileNav.classList.add('mobile-nav');
+  mobileNav.innerHTML = `
+    <nav class="py-4 px-6 bg-white flex flex-col space-y-4">
+      <a href="#home" class="text-primary hover:text-primary/80 font-medium">Home</a>
+      <a href="#about" class="text-gray-600 hover:text-primary font-medium">About</a>
+      <a href="#projects" class="text-gray-600 hover:text-primary font-medium">Projects</a>
+      <a href="#blog" class="text-gray-600 hover:text-primary font-medium">Blog</a>
+      <a href="#contact" class="text-gray-600 hover:text-primary font-medium">Contact</a>
+    </nav>
+  `;
+  mobileNav.style.display = 'none';
+  mobileNav.style.position = 'absolute';
+  mobileNav.style.top = '64px';
+  mobileNav.style.left = '0';
+  mobileNav.style.width = '100%';
+  mobileNav.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+  mobileNav.style.zIndex = '40';
+  
+  document.body.appendChild(mobileNav);
+  
+  if (menuButton) {
+    menuButton.addEventListener('click', function() {
+      if (mobileNav.style.display === 'none') {
+        mobileNav.style.display = 'block';
+      } else {
+        mobileNav.style.display = 'none';
+      }
+    });
+  }
+  
+  // Close mobile menu when clicking on links
+  mobileNav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function() {
+      mobileNav.style.display = 'none';
+    });
+  });
+  
+  // Close mobile menu when clicking outside
+  document.addEventListener('click', function(event) {
+    if (!event.target.closest('header button') && !event.target.closest('.mobile-nav')) {
+      mobileNav.style.display = 'none';
+    }
+  });
+  
+  // Simple form validation for contact form
+  const contactForm = document.querySelector('#contact form');
+  if (contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+      let valid = true;
+      const nameInput = document.querySelector('#name');
+      const emailInput = document.querySelector('#email');
+      const messageInput = document.querySelector('#message');
+      
+      if (nameInput && nameInput.value.trim() === '') {
+        valid = false;
+        nameInput.style.borderColor = 'red';
+      } else if (nameInput) {
+        nameInput.style.borderColor = '#d1d5db';
+      }
+      
+      if (emailInput) {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(emailInput.value)) {
+          valid = false;
+          emailInput.style.borderColor = 'red';
+        } else {
+          emailInput.style.borderColor = '#d1d5db';
+        }
+      }
+      
+      if (messageInput && messageInput.value.trim() === '') {
+        valid = false;
+        messageInput.style.borderColor = 'red';
+      } else if (messageInput) {
+        messageInput.style.borderColor = '#d1d5db';
+      }
+      
+      if (!valid) {
+        e.preventDefault();
+        alert('Please fill out all required fields correctly.');
+      }
+    });
+  }
+  
+  // Add scroll animation for elements
+  const animateOnScroll = function() {
+    const elements = document.querySelectorAll('.project-card, .blog-card, .stat-card');
+    
+    elements.forEach(element => {
+      const elementPosition = element.getBoundingClientRect().top;
+      const windowHeight = window.innerHeight;
+      
+      if (elementPosition < windowHeight - 100) {
+        element.classList.add('animate-fadeIn');
+      }
+    });
+  };
+  
+  // Add CSS class for animation
+  const style = document.createElement('style');
+  style.textContent = `
+    .animate-fadeIn {
+      animation: fadeIn 0.6s ease-in-out forwards;
+    }
+    
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .project-card, .blog-card, .stat-card {
+      opacity: 0;
+    }
+  `;
+  document.head.appendChild(style);
+  
+  // Run animation on scroll and on page load
+  window.addEventListener('scroll', animateOnScroll);
+  animateOnScroll(); // Run once on page load
+});
